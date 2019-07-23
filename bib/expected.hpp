@@ -8,14 +8,14 @@
 namespace bib {
 
 template<typename Exp, typename Err>
-class errorable {
+class expected {
 public:
 	// We should be able to construct this without additional verbosity.
-	errorable(Exp value) : expected_flag(true) { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+	expected(Exp value) : expected_flag(true) { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 		values.expected_value = value;
 	}
 
-	explicit errorable(Err error) : expected_flag{false} {
+	explicit expected(Err error) : expected_flag{false} {
 		values.unexpected_value = error;
 	}
 
@@ -40,10 +40,10 @@ public:
 	auto map(F function) {
 		if (expected_flag) {
 			auto value = function(values.expected_value);
-			return errorable<decltype(value), Err>(value);
+			return expected<decltype(value), Err>(value);
 		}
 
-		return errorable<typename std::invoke_result<F, Exp>::type, Err>(values.unexpected_value);
+		return expected<typename std::invoke_result<F, Exp>::type, Err>(values.unexpected_value);
 	}
 
 	// A way to invoke map.
@@ -59,7 +59,7 @@ public:
 			return function(values.expected_value);
 		}
 
-		return errorable<typename std::invoke_result<F, Exp>::type::error_type, Err>{values.unexpected_value};
+		return expected<typename std::invoke_result<F, Exp>::type::error_type, Err>{values.unexpected_value};
 	}
 
 	// Another way to invoke bind.
@@ -68,9 +68,9 @@ public:
 		return bind(function);
 	}
 
-	typedef Exp value_type;
+	typedef Exp expected_type;
 
-	typedef Err error_type;
+	typedef Err unexpected_type;
 
 private:
 	union {

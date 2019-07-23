@@ -4,7 +4,7 @@ project(bib)
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(bib STATIC
-        bib/errorable.hpp
+        bib/expected.hpp
         bib/cpl/light_mutex.hpp
         bib/cpl/light_mutex.cpp
         bib/cpl/lock.hpp
