@@ -10,6 +10,7 @@ add_library(bib STATIC
         bib/cpl/lock.hpp
         bib/data/buffer.cpp
         bib/data/buffer.hpp
-        bib/data/serialize.hpp bib/data/span.hpp)
+        bib/data/serialize.hpp
+        bib/data/span.hpp)
 
 #add_executable(bibtests )

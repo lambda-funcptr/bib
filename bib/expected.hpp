@@ -19,6 +19,13 @@ public:
 		values.unexpected_value = error;
 	}
 
+	~expected() {
+		if (expected_flag)
+			values.expected_value.~expected_value();
+		else
+			values.unexpected_value.~unexpected_value();
+	}
+
 	bool operator !() const {
 		return !expected_flag;
 	}
