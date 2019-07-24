@@ -5,10 +5,32 @@
 
 #pragma once
 
+#include <cstring>
+
 namespace bib::lang {
 
-bool is_alphanum(char input);
+bool is_whitespace(char input) {
+	switch (input) {
+		case ' ':
+			return true;
+		case '\f':
+			return true;
+		case '\n':
+			return true;
+		case '\r':
+			return true;
+		case '\t':
+			return true;
+		case '\v':
+			return true;
+		default:
+			return false;
+	}
+}
 
-bool is_whitespace(char input);
+bool is_alphanum(char input) {
+	char cmpstr[2] = {input, '\0'};
+	return std::strpbrk("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", cmpstr);
+}
 
 }
