@@ -33,4 +33,9 @@ bool is_alphanum(char input) {
 	return std::strpbrk("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", cmpstr);
 }
 
+bool is_numeric(char input) {
+	char cmpstr[2] = {input, '\0'};
+	return std::strpbrk("0123456789", cmpstr);
+}
+
 }
