@@ -56,7 +56,7 @@ public:
 
 	// If the function doesn't return anything.
 	template <typename F>
-	std::enable_if<std::is_void_v<std::invoke_result_t<F>, void>>
+	std::enable_if<std::is_void_v<std::invoke_result_t<F>, std::void_t>>
 	map(F function) {
 		if (expected_flag) {
             return expected<void, Err>(function(values.expected_value));
@@ -67,7 +67,7 @@ public:
 
 	// A way to invoke map.
 	template <typename F>
-	std::invoke_result_t<F> operator*(F function) {
+	auto operator*(F function) {
 		return map(function);
 	}
 
