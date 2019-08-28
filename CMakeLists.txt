@@ -11,6 +11,8 @@ add_library(bib STATIC
         bib/data/buffer.cpp
         bib/data/buffer.hpp
         bib/data/serialize.hpp
-        bib/data/span.hpp bib/lang/char_traits.hpp bib/lang/char_traits.cpp)
+        bib/data/span.hpp
+        bib/lang/char_traits.hpp
+        )
 
 #add_executable(bibtests )
