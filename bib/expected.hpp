@@ -30,7 +30,7 @@ public:
 		return !expected_flag;
 	}
 
-	bool valid() const {
+	[[nodiscard]] bool valid() const {
 		return expected_flag;
 	}
 
@@ -44,7 +44,8 @@ public:
 
 	// map :: map :: m a -> (a -> b) -> m b
 	template<typename F>
-	auto map(F function) {
+	std::enable_if_t<!std::is_void_v<std::invoke_result_t<F>>, std::invoke_result_t<F>>
+	map(F function) {
 		if (expected_flag) {
 			auto value = function(values.expected_value);
 			return expected<decltype(value), Err>(value);
@@ -53,15 +54,27 @@ public:
 		return expected<typename std::invoke_result<F, Exp>::type, Err>(values.unexpected_value);
 	}
 
+	// If the function doesn't return anything.
+	template <typename F>
+	std::enable_if<std::is_void_v<std::invoke_result_t<F>, void>>
+	map(F function) {
+		if (expected_flag) {
+            return expected<void, Err>(function(values.expected_value));
+        }
+
+		return expected<void, Err>(function(values.unexpected_value));
+    }
+
 	// A way to invoke map.
 	template <typename F>
-	auto operator*(F function) {
+	std::invoke_result_t<F> operator*(F function) {
 		return map(function);
 	}
 
 	// bind :: m a -> ( a -> m b ) -> m b
 	template <typename F>
-	auto bind(F function) {
+	std::enable_if_t<!std::is_void_v<std::invoke_result_t<F>>, std::invoke_result_t<F>>
+	bind(F function) {
 		if (expected_flag) {
 			return function(values.expected_value);
 		}
