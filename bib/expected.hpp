@@ -4,65 +4,58 @@
 //
 
 #include <type_traits>
+#include <variant>
 
 namespace bib {
 
-template<typename Exp, typename Err>
+template<typename Exp, typename Uxp>
 class expected {
 public:
 	// We should be able to construct this without additional verbosity.
-	expected(Exp value) : expected_flag(true) { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-		values.expected_value = value;
-	}
+	expected(const Exp& value) : values{value} { } // NOLINT(google-explicit-constructor,hicpp-explicit-conversions
 
-	explicit expected(Err error) : expected_flag{false} {
-		values.unexpected_value = error;
-	}
+	explicit expected(const Uxp& error) : values{error} { }
 
-	~expected() {
-		if (expected_flag)
-			values.expected_value.~expected_value();
-		else
-			values.unexpected_value.~unexpected_value();
-	}
+	~expected() = default;
 
-	bool operator !() const {
-		return !expected_flag;
+	[[nodiscard]] bool operator !() const {
+		// Returns true if the value is expected, false if not.
+		return valid();
 	}
 
 	[[nodiscard]] bool valid() const {
-		return expected_flag;
+		return values.index() == 0;
 	}
 
-	Exp& get() const {
-		return values.expected_value;
+	Exp get() const {
+		return std::get<Exp>(values);
 	}
 
-	Err& get_error() const {
-		return values.unexpected_value;
+	Uxp get_error() const {
+		return std::get<Uxp>(values);
 	};
 
 	// map :: map :: m a -> (a -> b) -> m b
 	template<typename F>
-	std::enable_if_t<!std::is_void_v<std::invoke_result_t<F>>, std::invoke_result_t<F>>
+	std::enable_if_t<!std::is_void_v<std::invoke_result_t<F, Exp>>, std::invoke_result_t<F>>
 	map(F function) {
-		if (expected_flag) {
-			auto value = function(values.expected_value);
-			return expected<decltype(value), Err>(value);
+		if (valid()) {
+			auto value = function(std::get<Exp>(values));
+			return expected<decltype(value), Uxp>(value);
 		}
 
-		return expected<typename std::invoke_result<F, Exp>::type, Err>(values.unexpected_value);
+		return expected<typename std::invoke_result<F, Exp>::type, Uxp>(std::get<Uxp>(values));
 	}
 
 	// If the function doesn't return anything.
 	template <typename F>
-	std::enable_if<std::is_void_v<std::invoke_result_t<F>, std::void_t>>
+	std::enable_if<std::is_void_v<std::invoke_result_t<F, Exp>>, void>
 	map(F function) {
-		if (expected_flag) {
-            return expected<void, Err>(function(values.expected_value));
+		if (valid()) {
+            function(std::get<Exp>(values));
         }
 
-		return expected<void, Err>(function(values.unexpected_value));
+		return std::enable_if<std::is_void_v<std::invoke_result_t<F, Exp>>, void>{};
     }
 
 	// A way to invoke map.
@@ -75,11 +68,11 @@ public:
 	template <typename F>
 	std::enable_if_t<!std::is_void_v<std::invoke_result_t<F>>, std::invoke_result_t<F>>
 	bind(F function) {
-		if (expected_flag) {
-			return function(values.expected_value);
+		if (valid()) {
+			return function(std::get<Exp>(values));
 		}
 
-		return expected<typename std::invoke_result<F, Exp>::type::error_type, Err>{values.unexpected_value};
+		return expected<typename std::invoke_result<F, Exp>::type::error_type, Uxp>{std::get<Uxp>(values)};
 	}
 
 	// Another way to invoke bind.
@@ -90,15 +83,10 @@ public:
 
 	typedef Exp expected_type;
 
-	typedef Err unexpected_type;
+	typedef Uxp unexpected_type;
 
 private:
-	union {
-		Exp expected_value;
-		Err unexpected_value;
-	} values;
-
-	bool expected_flag;
+	std::variant<Exp, Uxp> values;
 };
 
 }
