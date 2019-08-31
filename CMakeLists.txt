@@ -15,4 +15,6 @@ add_library(bib STATIC
         bib/lang/char_traits.hpp
         )
 
+target_compile_options(retro PUBLIC -stdlib=libc++)
+
 #add_executable(bibtests )
