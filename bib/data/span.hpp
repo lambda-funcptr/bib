@@ -4,6 +4,7 @@
 //
 
 #include <cstdint>
+#include <cstddef>
 
 namespace bib::data {
 
@@ -21,7 +22,7 @@ public:
 		return container_ref.data() + begin_offset;
 	}
 
-	std::size_t size() const {
+	[[nodiscard]] std::size_t size() const {
 		return end_offset - begin_offset;
 	}
 

@@ -26,9 +26,9 @@ public:
 	~buffer() noexcept;
 
 	std::byte* data() noexcept;
-	const std::byte* data() const noexcept;
+	[[nodiscard]] const std::byte* data() const noexcept;
 
-	std::size_t size() const noexcept;
+	[[nodiscard]] std::size_t size() const noexcept;
 
 private:
 	std::size_t buffer_size;
